@@ -4,6 +4,7 @@ venv/
 
 __pycache__/
 *.py[cod]
+requirementsbyalex.txt
 
 .idea
 .DS_Store
