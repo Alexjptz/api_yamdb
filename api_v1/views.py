@@ -1,3 +1,40 @@
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404
 
-# Create your views here.
+from rest_framework import viewsets
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.pagination import PageNumberPagination
+
+from .models import Comments, Reviews, Titles
+from .permissions import IsOwnerOrAdminOrReadOnly
+from .serializers import CommentsSerializer, ReviewsSerializer
+
+
+class ReviewsViewSet(viewsets.ModelViewSet):
+    serializer_class = ReviewsSerializer
+    permission_classes = (IsAuthenticatedOrReadOnly, IsOwnerOrAdminOrReadOnly)
+
+    def get_queryset(self):
+        title_id = self.kwargs['title_id']
+        title = get_object_or_404(Titles, id=title_id)
+        queryset = Reviews.objects.filter(title=title)
+        return queryset
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
+
+
+class CommentsViewSet(viewsets.ModelViewSet):
+    serializer_class = CommentsSerializer
+    permission_classes = (IsAuthenticatedOrReadOnly, IsOwnerOrAdminOrReadOnly)
+    pagination_class = PageNumberPagination
+
+    def get_queryset(self):
+        title_id = self.kwargs['title_id']
+        title = get_object_or_404(Titles, id=title_id)
+        review_id = self.kwargs['review_id']
+        review = get_object_or_404(Reviews, title=title, id=review_id)
+        queryset = Comments.objects.filter(review=review)
+        return queryset
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user)
