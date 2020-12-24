@@ -1,8 +1,8 @@
-from django.contrib.auth import get_user_model
+# from django.contrib.auth import get_user_model
 from django.db import models
+from users.models import User
 
-
-User = get_user_model()
+# User = get_user_model()
 
 
 class Categories(models.Model):
@@ -29,7 +29,7 @@ class Reviews(models.Model):
         related_name='reviews'
     )
     text = models.TextField()
-    score_choices = [(i,i) for i in range(1,11)]
+    score_choices = [(i, i) for i in range(1, 11)]
     score = models.IntegerField(choices=score_choices)
     pub_date = models.DateTimeField(
         'Дата добавления',

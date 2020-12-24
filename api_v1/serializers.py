@@ -1,5 +1,14 @@
+from django.contrib.auth import models
+from django.db.models import fields
 from rest_framework import serializers
-from .models import Comments, Reviews, User
+from .models import Comments, Reviews
+from users.models import User
+
+
+class CreateUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('id', 'email')
 
 
 class ReviewsSerializer(serializers.ModelSerializer):

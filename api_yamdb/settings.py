@@ -19,6 +19,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'django_filters',
     'api_v1',
+    'users',
 ]
 
 CORS_ORIGIN_ALLOW_ALL = True
@@ -92,5 +93,10 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static/'),)
 
 REST_FRAMEWORK = {
-        'PAGE_SIZE': 10
+        # 'PAGE_SIZE': 10
     }
+
+AUTH_USER_MODEL = 'users.User'
+
+EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
+EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'sent_emails')
