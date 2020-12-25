@@ -1,7 +1,7 @@
 from django.shortcuts import get_object_or_404
 
 from rest_framework import viewsets
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly
 from rest_framework.pagination import PageNumberPagination
 from re import split
 from .models import Comments, Reviews, Titles
@@ -11,10 +11,11 @@ from users.models import User
 
 from django.core.mail import send_mail
 from rest_framework.views import Response, status
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 
 
 @api_view(['POST'])
+@permission_classes([AllowAny])
 def create_user(request):
     serialized = CreateUserSerializer(data=request.data)
     if serialized.is_valid():

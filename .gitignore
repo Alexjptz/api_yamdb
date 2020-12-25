@@ -16,5 +16,6 @@ requirementsbyalex.txt
 *.sublime-workspace
 
 media/
+sent_emails/
 
 db.sqlite3

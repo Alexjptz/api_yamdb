@@ -1,8 +1,11 @@
 from django.urls import include, path
-from rest_framework import views
 from rest_framework.routers import DefaultRouter
 from .views import CommentsViewSet, ReviewsViewSet, create_user
-from . import views
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView
+)
+
 
 v1_router = DefaultRouter()
 v1_router.register(
@@ -16,7 +19,13 @@ v1_router.register(
     basename='comment-list'
 )
 
+auth_patterns = [
+    path('email/', create_user, name='create_user'),
+    path('token/', TokenObtainPairView.as_view(), name='token_obtain'),
+    path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+]
+
 urlpatterns = [
     path('v1/', include(v1_router.urls)),
-    path('v1/auth/email/', views.create_user, name='create_user'),
+    path('v1/auth/', include(auth_patterns)),
 ]
