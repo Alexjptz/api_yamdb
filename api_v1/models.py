@@ -1,10 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.db import models
-from django.db.models.deletion import SET_NULL
-from django.db.models.fields import IntegerField
-
 from django.utils.text import slugify
-
 
 User = get_user_model()
 
@@ -49,12 +45,12 @@ class Genres(models.Model):
         super().save(*args, **kwargs)
 
 
-class Titels(models.Model):
+class Titles(models.Model):
     name = models.CharField(max_length=50, blank=False, null=False)
     year = models.PositiveSmallIntegerField(
         blank=True, null=True, db_index=True
     )
-    rating = models.IntegerField()                    # тут непонятно как сделать
+    rating = models.IntegerField()  # тут непонятно как сделать
     description = models.TextField(blank=True, null=True)
     genre = models.ManyToManyField(Genres, db_index=True)
     category = models.ForeignKey(
@@ -77,12 +73,12 @@ class Reviews(models.Model):
         related_name='reviews'
     )
     title = models.ForeignKey(
-        Titels,
+        Titles,
         on_delete=models.CASCADE,
         related_name='reviews'
     )
     text = models.TextField()
-    score_choices = [(i,i) for i in range(1,11)]
+    score_choices = [(i, i) for i in range(1, 11)]
     score = models.IntegerField(choices=score_choices)
     pub_date = models.DateTimeField(
         'Дата добавления',

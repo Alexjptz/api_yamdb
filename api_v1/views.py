@@ -1,12 +1,13 @@
 from django.shortcuts import get_object_or_404
-
-from rest_framework import viewsets
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework import filters, permissions, viewsets
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
-from .models import Comments, Reviews, Titles
-from .permissions import IsOwnerOrAdminOrReadOnly
-from .serializers import CommentsSerializer, ReviewsSerializer
+from .models import Categories, Comments, Genres, Reviews, Titles
+from .permissions import IsAdminOrSafeMethod, IsOwnerOrAdminOrReadOnly
+from .serializers import (CategorySerializer, CommentsSerializer,
+                          GenreSerializer, ReviewsSerializer,
+                          TitleSerializerRead, TitleSerializerWrite)
 
 
 class ReviewsViewSet(viewsets.ModelViewSet):
@@ -39,18 +40,6 @@ class CommentsViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
-from rest_framework import filters, viewsets, permissions
-
-from .permissions import IsAdminOrSafeMethod
-from .models import Titels, Categories, Genres
-from .serializers import (
-    TitleSerializerRead, 
-    TitleSerializerWrite,
-    GenreSerializer,
-    CategorySerializer
-)
-
-
 
 class CategoryViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAdminOrSafeMethod]
@@ -60,8 +49,6 @@ class CategoryViewSet(viewsets.ModelViewSet):
     lookup_field = 'slug'
     filter_backends = [filters.SearchFilter]
     search_fields = ['=name']
-    
-        
 
 
 class GenreViewSet(viewsets.ModelViewSet):
@@ -75,10 +62,10 @@ class GenreViewSet(viewsets.ModelViewSet):
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    queryset = Titels.objects.all()
+    queryset = Titles.objects.all()
     permission_classes = [IsAdminOrSafeMethod]
     filter_backends = (filters.SearchFilter)
-    search_fields = ['=name', '=year', '=category__slug', '=genre__slug']    
+    search_fields = ['=name', '=year', '=category__slug', '=genre__slug']
 
     def get_serializer_class(self):
         if self.request.method in permissions.SAFE_METHODS:
