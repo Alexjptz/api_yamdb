@@ -36,3 +36,4 @@ class TitleSerializerWrite(serializers.ModelSerializer):
     class Meta:
         fields = '__all__'
         model = Titels
+        
