@@ -1,17 +1,42 @@
+from re import split
+
+from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 from rest_framework import filters, permissions, viewsets
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.pagination import PageNumberPagination
-<<<<<<< HEAD
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
-=======
-from rest_framework.serializers import ValidationError
->>>>>>> 120604420271fc9c1a3fb8c9f3cc4b78b10dfe01
+from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly
+from rest_framework.views import Response, status
 
 from .models import Categories, Comments, Genres, Reviews, Titles
-from .permissions import IsAdminOrSafeMethod, IsOwnerOrAdminOrReadOnly
+from .permissions import IsModerator, IsOwnerOrAdminOrReadOnly
 from .serializers import (CategorySerializer, CommentsSerializer,
-                          GenreSerializer, ReviewsSerializer,
-                          TitleSerializerRead, TitleSerializerWrite)
+                          CreateUserSerializer, GenreSerializer,
+                          ReviewsSerializer, TitleSerializerRead,
+                          TitleSerializerWrite)
+
+User = get_user_model()
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def create_user(request):
+    serialized = CreateUserSerializer(data=request.data)
+    if serialized.is_valid():
+        confirmation_code = User.objects.make_random_password()
+        username = split(r'@', serialized.data['email'])[0]
+        user = User.objects.create_user(
+            email=serialized.data['email'],
+            username=username,
+            password=confirmation_code
+        )
+        user.email_user(
+            subject='Код подтверждения',
+            message='Твой код подтверждения - {}'.format(confirmation_code),
+            from_email='Test@test.com'
+        )
+        return Response(serialized.data, status=status.HTTP_201_CREATED)
+    return Response(serialized.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class ReviewsViewSet(viewsets.ModelViewSet):
@@ -26,15 +51,18 @@ class ReviewsViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         title = get_object_or_404(Titles, pk=self.kwargs.get('title_id'))
-        is_unqiue = Reviews.objects.filter(author=self.request.user, title=title).exists()
+        is_unqiue = Reviews.objects.filter(
+            author=self.request.user,
+            title=title
+        ).exists()
         if is_unqiue:
-            raise ValidationError("You can write only one review.")
+            raise ValidationError('You can write only one review.')
         serializer.save(author=self.request.user)
 
 
 class CommentsViewSet(viewsets.ModelViewSet):
     serializer_class = CommentsSerializer
-    permission_classes = (IsAuthenticatedOrReadOnly, IsOwnerOrAdminOrReadOnly)
+    permission_classes = [IsOwnerOrAdminOrReadOnly]
     pagination_class = PageNumberPagination
 
     def get_queryset(self):
@@ -48,24 +76,9 @@ class CommentsViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
-<<<<<<< HEAD
-=======
-from rest_framework import filters, viewsets, permissions
-
-from .permissions import IsAdminOrSafeMethod
-from .models import Titles, Categories, Genres
-from .serializers import (
-    TitleSerializerRead, 
-    TitleSerializerWrite,
-    GenreSerializer,
-    CategorySerializer
-)
-
-
->>>>>>> 120604420271fc9c1a3fb8c9f3cc4b78b10dfe01
 
 class CategoryViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsAdminOrSafeMethod]
+    permission_classes = [IsOwnerOrAdminOrReadOnly]
     serializer_class = CategorySerializer
     queryset = Categories.objects.all()
     http_method_names = ['get', 'post', 'delete']
@@ -75,7 +88,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
 
 
 class GenreViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsAdminOrSafeMethod]
+    permission_classes = [IsOwnerOrAdminOrReadOnly]
     serializer_class = GenreSerializer
     queryset = Genres.objects.all()
     http_method_names = ['get', 'post', 'delete']
@@ -86,7 +99,7 @@ class GenreViewSet(viewsets.ModelViewSet):
 
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Titles.objects.all()
-    permission_classes = [IsAdminOrSafeMethod]
+    permission_classes = [IsOwnerOrAdminOrReadOnly]
     filter_backends = (filters.SearchFilter)
     search_fields = ['=name', '=year', '=category__slug', '=genre__slug']
 

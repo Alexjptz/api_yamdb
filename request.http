@@ -1,0 +1,20 @@
+@baseUrl = http://127.0.0.1:8000/api/v1
+
+###
+
+POST {{baseUrl}}/auth/email/
+Content-Type: application/json
+
+{
+    "email": "testtest@myemail.com"
+}
+
+###
+
+POST {{baseUrl}}/auth/token/
+Content-Type: application/json
+
+{
+    "email": "testtest@myemail.com",
+    "confirmation_code": "4J8vSZvm9y"
+}

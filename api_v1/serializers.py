@@ -1,10 +1,30 @@
+from django.contrib.auth import get_user_model
 from rest_framework import serializers
-<<<<<<< HEAD
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 from .models import Categories, Comments, Genres, Reviews, Titles
-=======
-from .models import Comments, Reviews
->>>>>>> 120604420271fc9c1a3fb8c9f3cc4b78b10dfe01
+
+User = get_user_model()
+
+
+class CreateUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('email',)
+
+
+class GetMyTokenSerializer(TokenObtainPairSerializer):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        del self.fields['password']
+        self.fields['confirmation_code'] = serializers.CharField(
+            required=True
+        )
+
+    def validate(self, attrs):
+        attrs['password'] = attrs.pop('confirmation_code')
+        return super().validate(attrs)
 
 
 class ReviewsSerializer(serializers.ModelSerializer):
@@ -29,13 +49,6 @@ class CommentsSerializer(serializers.ModelSerializer):
         model = Comments
 
 
-<<<<<<< HEAD
-=======
-from api_v1.models import Categories, Genres, Titles
-from rest_framework import serializers
-
-
->>>>>>> 120604420271fc9c1a3fb8c9f3cc4b78b10dfe01
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         fields = ['name', 'slug']

@@ -1,16 +1,16 @@
-from rest_framework import permissions
+from django.contrib.auth import get_user_model
+from rest_framework.permissions import SAFE_METHODS, BasePermission
+
+User = get_user_model()
 
 
-class IsOwnerOrAdminOrReadOnly(permissions.BasePermission):
+class IsOwnerOrAdminOrReadOnly(BasePermission):
     def has_object_permission(self, request, view, obj):
-        return (request.method in permissions.SAFE_METHODS or
+        return (request.method in SAFE_METHODS or
                 request.user == obj.author or
-                request.user.is_staff)
+                request.user.is_superuser)
 
 
-class IsAdminOrSafeMethod(permissions.BasePermission):
-    def has_permission(self, request, view):
-        return request.method in permissions.SAFE_METHODS or (
-                request.user.is_authenticated and request.user.is_admin
-        )
-        
+class IsModerator(BasePermission):
+    def has_object_permission(self, request, view, obj):
+        return (request.user.role == User.Role.MODERATOR)
