@@ -3,6 +3,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.serializers import ValidationError
 
 from .models import Comments, Reviews, Titles
 from .permissions import IsOwnerOrAdminOrReadOnly
@@ -20,6 +21,10 @@ class ReviewsViewSet(viewsets.ModelViewSet):
         return queryset
 
     def perform_create(self, serializer):
+        title = get_object_or_404(Titles, pk=self.kwargs.get('title_id'))
+        is_unqiue = Reviews.objects.filter(author=self.request.user, title=title).exists()
+        if is_unqiue:
+            raise ValidationError("You can write only one review.")
         serializer.save(author=self.request.user)
 
 
