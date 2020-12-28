@@ -1,17 +1,18 @@
-from django.shortcuts import get_object_or_404
-
-from rest_framework import viewsets
-from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly
-from rest_framework.pagination import PageNumberPagination
 from re import split
-from .models import Comments, Reviews, Titles
-from .permissions import IsOwnerOrAdminOrReadOnly
-from .serializers import CommentsSerializer, CreateUserSerializer, ReviewsSerializer
+
+from django.shortcuts import get_object_or_404
+from rest_framework import viewsets
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.pagination import PageNumberPagination
+from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly
+from rest_framework.views import Response, status
+
 from users.models import User
 
-from django.core.mail import send_mail
-from rest_framework.views import Response, status
-from rest_framework.decorators import api_view, permission_classes
+from .models import Comments, Reviews, Titles
+from .permissions import IsOwnerOrAdminOrReadOnly
+from .serializers import (CommentsSerializer, CreateUserSerializer,
+                          ReviewsSerializer)
 
 
 @api_view(['POST'])
@@ -28,11 +29,10 @@ def create_user(request):
         confirmation_code = User.objects.make_random_password()
         user.set_password(confirmation_code)
         user.save()
-        send_mail(
-            'Твой код подтверждения',
-            'Код подтверждения - {}'.format(confirmation_code),
-            'Test@testtest.com',
-            ['confirmation_code@test.com']
+        user.email_user(
+            subject='Код подтверждения',
+            message='Твой код подтверждения - {}'.format(confirmation_code),
+            from_email='Test@test.com'
         )
         return Response(serialized.data, status=status.HTTP_201_CREATED)
     return Response(serialized.errors, status=status.HTTP_400_BAD_REQUEST)
