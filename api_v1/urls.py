@@ -4,6 +4,7 @@ from rest_framework_simplejwt.views import (TokenObtainPairView,
                                             TokenRefreshView)
 
 from .views import CommentsViewSet, ReviewsViewSet, create_user
+from .serializers import GetMyTokenSerializer
 
 v1_router = DefaultRouter()
 v1_router.register(
@@ -19,7 +20,10 @@ v1_router.register(
 
 auth_patterns = [
     path('email/', create_user, name='create_user'),
-    path('token/', TokenObtainPairView.as_view(), name='token_obtain'),
+    path('token/', TokenObtainPairView.as_view(
+        serializer_class=GetMyTokenSerializer),
+        name='token_obtain'
+    ),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 ]
 

@@ -1,16 +1,30 @@
-from django.contrib.auth import models
+from django.contrib.auth import get_user_model, models
 from django.db.models import fields
 from rest_framework import serializers
-
-from users.models import User
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 from .models import Comments, Reviews
+
+
+User = get_user_model()
 
 
 class CreateUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('id', 'email')
+        fields = ('email',)
+
+
+class GetMyTokenSerializer(TokenObtainPairSerializer):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        del self.fields['password']
+        self.fields['confirmation_code'] = serializers.CharField(required=True)
+
+    def validate(self, attrs):
+        attrs['password'] = attrs.pop('confirmation_code')
+        return super().validate(attrs)
 
 
 class ReviewsSerializer(serializers.ModelSerializer):

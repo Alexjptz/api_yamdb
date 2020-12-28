@@ -1,18 +1,20 @@
-from re import split
-
 from django.shortcuts import get_object_or_404
+
 from rest_framework import viewsets
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly
-from rest_framework.views import Response, status
-
-from users.models import User
-
+from rest_framework.pagination import PageNumberPagination
+from re import split
 from .models import Comments, Reviews, Titles
 from .permissions import IsOwnerOrAdminOrReadOnly
-from .serializers import (CommentsSerializer, CreateUserSerializer,
-                          ReviewsSerializer)
+from .serializers import (
+    CommentsSerializer,
+    CreateUserSerializer,
+    ReviewsSerializer
+)
+from users.models import User
+
+from rest_framework.views import Response, status
+from rest_framework.decorators import api_view, permission_classes
 
 
 @api_view(['POST'])
@@ -20,15 +22,13 @@ from .serializers import (CommentsSerializer, CreateUserSerializer,
 def create_user(request):
     serialized = CreateUserSerializer(data=request.data)
     if serialized.is_valid():
-        username = split(r'@', serialized.data['email'])[0]
-        User.objects.create(
-            email=serialized.data['email'],
-            username=username
-        )
-        user = User.objects.get(email=serialized.data['email'])
         confirmation_code = User.objects.make_random_password()
-        user.set_password(confirmation_code)
-        user.save()
+        username = split(r'@', serialized.data['email'])[0]
+        user = User.objects.create_user(
+            email=serialized.data['email'],
+            username=username,
+            password=confirmation_code
+        )
         user.email_user(
             subject='Код подтверждения',
             message='Твой код подтверждения - {}'.format(confirmation_code),
@@ -54,7 +54,7 @@ class ReviewsViewSet(viewsets.ModelViewSet):
 
 class CommentsViewSet(viewsets.ModelViewSet):
     serializer_class = CommentsSerializer
-    permission_classes = (IsAuthenticatedOrReadOnly, IsOwnerOrAdminOrReadOnly)
+    permission_classes = (IsAuthenticatedOrReadOnly | IsOwnerOrAdminOrReadOnly,)
     pagination_class = PageNumberPagination
 
     def get_queryset(self):
