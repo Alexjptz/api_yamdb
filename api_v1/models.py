@@ -49,7 +49,7 @@ class Genres(models.Model):
         super().save(*args, **kwargs)
 
 
-class Titels(models.Model):
+class Titles(models.Model):
     name = models.CharField(max_length=50, blank=False, null=False)
     year = models.PositiveSmallIntegerField(
         blank=True, null=True, db_index=True
@@ -77,7 +77,7 @@ class Reviews(models.Model):
         related_name='reviews'
     )
     title = models.ForeignKey(
-        Titels,
+        Titles,
         on_delete=models.CASCADE,
         related_name='reviews'
     )

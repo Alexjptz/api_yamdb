@@ -47,7 +47,7 @@ class CommentsViewSet(viewsets.ModelViewSet):
 from rest_framework import filters, viewsets, permissions
 
 from .permissions import IsAdminOrSafeMethod
-from .models import Titels, Categories, Genres
+from .models import Titles, Categories, Genres
 from .serializers import (
     TitleSerializerRead, 
     TitleSerializerWrite,
@@ -80,7 +80,7 @@ class GenreViewSet(viewsets.ModelViewSet):
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    queryset = Titels.objects.all()
+    queryset = Titles.objects.all()
     permission_classes = [IsAdminOrSafeMethod]
     filter_backends = (filters.SearchFilter)
     search_fields = ['=name', '=year', '=category__slug', '=genre__slug']    
