@@ -1,6 +1,10 @@
 from rest_framework import serializers
+<<<<<<< HEAD
 
 from .models import Categories, Comments, Genres, Reviews, Titles
+=======
+from .models import Comments, Reviews
+>>>>>>> 120604420271fc9c1a3fb8c9f3cc4b78b10dfe01
 
 
 class ReviewsSerializer(serializers.ModelSerializer):
@@ -25,6 +29,13 @@ class CommentsSerializer(serializers.ModelSerializer):
         model = Comments
 
 
+<<<<<<< HEAD
+=======
+from api_v1.models import Categories, Genres, Titles
+from rest_framework import serializers
+
+
+>>>>>>> 120604420271fc9c1a3fb8c9f3cc4b78b10dfe01
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         fields = ['name', 'slug']

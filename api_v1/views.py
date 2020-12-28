@@ -1,7 +1,11 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import filters, permissions, viewsets
 from rest_framework.pagination import PageNumberPagination
+<<<<<<< HEAD
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
+=======
+from rest_framework.serializers import ValidationError
+>>>>>>> 120604420271fc9c1a3fb8c9f3cc4b78b10dfe01
 
 from .models import Categories, Comments, Genres, Reviews, Titles
 from .permissions import IsAdminOrSafeMethod, IsOwnerOrAdminOrReadOnly
@@ -21,6 +25,10 @@ class ReviewsViewSet(viewsets.ModelViewSet):
         return queryset
 
     def perform_create(self, serializer):
+        title = get_object_or_404(Titles, pk=self.kwargs.get('title_id'))
+        is_unqiue = Reviews.objects.filter(author=self.request.user, title=title).exists()
+        if is_unqiue:
+            raise ValidationError("You can write only one review.")
         serializer.save(author=self.request.user)
 
 
@@ -40,6 +48,21 @@ class CommentsViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
+<<<<<<< HEAD
+=======
+from rest_framework import filters, viewsets, permissions
+
+from .permissions import IsAdminOrSafeMethod
+from .models import Titles, Categories, Genres
+from .serializers import (
+    TitleSerializerRead, 
+    TitleSerializerWrite,
+    GenreSerializer,
+    CategorySerializer
+)
+
+
+>>>>>>> 120604420271fc9c1a3fb8c9f3cc4b78b10dfe01
 
 class CategoryViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAdminOrSafeMethod]

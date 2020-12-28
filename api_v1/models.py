@@ -50,7 +50,6 @@ class Titles(models.Model):
     year = models.PositiveSmallIntegerField(
         blank=True, null=True, db_index=True
     )
-    rating = models.IntegerField()  # тут непонятно как сделать
     description = models.TextField(blank=True, null=True)
     genre = models.ManyToManyField(Genres, db_index=True)
     category = models.ForeignKey(
