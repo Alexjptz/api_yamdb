@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.db import models
 from django.utils.text import slugify
+from django.db.models import Avg
 
 User = get_user_model()
 
@@ -62,6 +63,11 @@ class Titles(models.Model):
     )
     # нужно добавить метод rating (считает среднее по ревью)
     # желательно сделать свойством @property
+
+    @property
+    def rating(self):
+        avg = self.reviews.aggregate(Avg('score'))
+        return avg['score__avg']
 
     def __str__(self):
         return self.name
