@@ -4,13 +4,17 @@ from rest_framework.permissions import SAFE_METHODS, BasePermission
 User = get_user_model()
 
 
-class IsOwnerOrAdminOrReadOnly(BasePermission):
+class IsOwnerOrReadOnly(BasePermission):
     def has_object_permission(self, request, view, obj):
         return (request.method in SAFE_METHODS or
-                request.user == obj.author or
-                request.user.is_superuser)
+                request.user == obj.author)
 
 
 class IsModerator(BasePermission):
     def has_object_permission(self, request, view, obj):
         return (request.user.role == User.Role.MODERATOR)
+
+
+class IsAdmin(BasePermission):
+    def has_object_permission(self, request, view, obj):
+        return (request.user.role == User.Role.ADMIN)

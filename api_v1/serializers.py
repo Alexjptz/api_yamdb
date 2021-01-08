@@ -13,6 +13,19 @@ class CreateUserSerializer(serializers.ModelSerializer):
         fields = ('email',)
 
 
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = (
+            'first_name',
+            'last_name',
+            'username',
+            'bio',
+            'email',
+            'role',
+        )
+
+
 class GetMyTokenSerializer(TokenObtainPairSerializer):
 
     def __init__(self, *args, **kwargs):
@@ -34,7 +47,7 @@ class ReviewsSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
-        fields = ('id', 'text', 'author', 'score', 'pub_date')
+        fields = ('id', 'text', 'author', 'score', 'pub_date',)
         model = Reviews
 
 
@@ -45,19 +58,19 @@ class CommentsSerializer(serializers.ModelSerializer):
     )
 
     class Meta:
-        fields = ('id', 'text', 'author', 'pub_date')
+        fields = ('id', 'text', 'author', 'pub_date',)
         model = Comments
 
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
-        fields = ['name', 'slug']
+        fields = ('name', 'slug',)
         model = Categories
 
 
 class GenreSerializer(serializers.ModelSerializer):
     class Meta:
-        fields = ['name', 'slug']
+        fields = ('name', 'slug',)
         model = Genres
 
 
