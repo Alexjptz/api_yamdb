@@ -6,15 +6,21 @@ User = get_user_model()
 
 class IsOwnerOrReadOnly(BasePermission):
     def has_object_permission(self, request, view, obj):
-        return (request.method in SAFE_METHODS or
-                request.user == obj.author)
+        # return (request.method in SAFE_METHODS or
+        #         request.user == obj.author)
+        return request.user == obj.user
+
+
+class IsUser(BasePermission):
+    def has_object_permission(self, request, view, obj):
+        return request.user.role == User.Role.USER
 
 
 class IsModerator(BasePermission):
     def has_object_permission(self, request, view, obj):
-        return (request.user.role == User.Role.MODERATOR)
+        return request.user.role == User.Role.MODERATOR
 
 
 class IsAdmin(BasePermission):
     def has_object_permission(self, request, view, obj):
-        return (request.user.role == User.Role.ADMIN)
+        return request.user.role == User.Role.ADMIN

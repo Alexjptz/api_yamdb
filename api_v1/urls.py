@@ -4,11 +4,18 @@ from rest_framework_simplejwt.views import (TokenObtainPairView,
                                             TokenRefreshView)
 
 from .serializers import GetMyTokenSerializer
-from .views import (CategoryViewSet, CommentsViewSet, GenreViewSet,
-                    ReviewsViewSet, TitleViewSet, UserViewSet, create_user)
+from .views import (CategoryViewSet, CommentsViewSet, CreateUser, GenreViewSet,
+                    ReviewsViewSet, TitleViewSet, UserAdminViewSet,
+                    UserPersonalData, UsersListCreateViewSet)
 
 v1_router = DefaultRouter()
-v1_router.register('users', UserViewSet, basename='user-list')  # User url
+v1_router.register('users', UsersListCreateViewSet, basename='user-list')
+v1_router.register('users/me', UserPersonalData, basename='personal-data')
+v1_router.register(
+    'users/(?P<username>.+)',
+    UserAdminViewSet,
+    basename='admin-user'
+)
 v1_router.register(
     'titles/(?P<title_id>[0-9]+)/reviews',
     ReviewsViewSet,
@@ -24,7 +31,7 @@ v1_router.register('genres', GenreViewSet, basename='genres')
 v1_router.register('titles', TitleViewSet, basename='titles')
 
 auth_patterns = [
-    path('email/', create_user, name='create_user'),
+    path('email/', CreateUser, name='create_user'),
     path('token/', TokenObtainPairView.as_view(
         serializer_class=GetMyTokenSerializer),
         name='token_obtain'
