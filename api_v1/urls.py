@@ -10,7 +10,7 @@ from .views import (CategoryViewSet, CommentsViewSet, CreateUser, GenreViewSet,
 
 v1_router = DefaultRouter()
 v1_router.register('users', UsersListCreateViewSet, basename='user-list')
-v1_router.register('users/me', UserPersonalData, basename='personal-data')
+v1_router.register('users/me', UserPersonalData, basename='personaldata-list')
 v1_router.register(
     'users/(?P<username>.+)',
     UserAdminViewSet,

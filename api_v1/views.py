@@ -46,27 +46,6 @@ class CreateUser(CreateAPIView):
         return Response(serialized.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-# @api_view(['POST'])
-# @permission_classes([AllowAny])
-# def create_user(request):
-#     serialized = CreateUserSerializer(data=request.data)
-#     if serialized.is_valid():
-#         confirmation_code = User.objects.make_random_password()
-#         username = split(r'@', serialized.data['email'])[0]
-#         user = User.objects.create_user(
-#             email=serialized.data['email'],
-#             username=username,
-#             password=confirmation_code
-#         )
-#         user.email_user(
-#             subject='Код подтверждения',
-#             message='Твой код подтверждения - {}'.format(confirmation_code),
-#             from_email='Test@test.com'
-#         )
-#         return Response(serialized.data, status=status.HTTP_201_CREATED)
-#     return Response(serialized.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
 class UsersListCreateViewSet(CreateModelMixin, ListModelMixin, GenericViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
@@ -78,29 +57,28 @@ class UsersListCreateViewSet(CreateModelMixin, ListModelMixin, GenericViewSet):
 
 class UserPersonalData(ListModelMixin, UpdateModelMixin, GenericViewSet):
     serializer_class = UserSerializer
-    permissions_classes = [IsAuthenticated, IsOwnerOrReadOnly]
-
-    def get_object(self):
-        obj = get_object_or_404(g)
-        return 
+    # permissions_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        queryset = User.objects.filter(username=self.request.user)
+        queryset = get_object_or_404(User, username=self.kwargs['username'])
+        # queryset = User.objects.filter(username=self.request.user)
         return queryset
-
-    def perform_update(self, serializer):
-        serializer.save()
 
 
 class UserAdminViewSet(CreateModelMixin, ListModelMixin, GenericViewSet):
-    queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated, IsAdmin]
+
+    def get_queryset(self):
+        username = self.kwargs['username']
+        user = get_object_or_404(User, username=username)
+        queryset = User.objects.filter(username=username)
+        return queryset
 
 
 class ReviewsViewSet(ModelViewSet):
     serializer_class = ReviewsSerializer
-    permission_classes = [IsAuthenticated, IsOwnerOrReadOnly]
+    permission_classes = [IsOwnerOrReadOnly]
 
     def get_queryset(self):
         title_id = self.kwargs['title_id']
