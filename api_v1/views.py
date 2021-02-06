@@ -7,7 +7,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.filters import SearchFilter
 from rest_framework.generics import CreateAPIView, RetrieveUpdateAPIView
 from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
-                                   ListModelMixin, UpdateModelMixin)
+                                   ListModelMixin, RetrieveModelMixin, UpdateModelMixin)
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import (AllowAny, IsAuthenticated,
                                         IsAuthenticatedOrReadOnly)
@@ -15,7 +15,7 @@ from rest_framework.views import APIView, Response, status
 from rest_framework.viewsets import GenericViewSet, ModelViewSet
 
 from .models import Categories, Comments, Genres, Reviews, Titles
-from .permissions import IsAdmin, IsModerator, IsOwnerOrReadOnly
+from .permissions import IsAdmin, IsAdminOrReadOnly, IsModerator, IsOwnerOrReadOnly, IsUser
 from .serializers import (CategorySerializer, CommentsSerializer,
                           CreateUserSerializer, GenreSerializer,
                           ReviewsSerializer, TitleSerializerRead,
@@ -55,14 +55,21 @@ class UsersListCreateViewSet(CreateModelMixin, ListModelMixin, GenericViewSet):
     pagination_class = PageNumberPagination
 
 
-class UserPersonalData(ListModelMixin, UpdateModelMixin, GenericViewSet):
+class UserPersonalData(RetrieveModelMixin, UpdateModelMixin, GenericViewSet):
     serializer_class = UserSerializer
-    # permissions_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
+    pagination_class = None
 
-    def get_queryset(self):
-        queryset = get_object_or_404(User, username=self.kwargs['username'])
-        # queryset = User.objects.filter(username=self.request.user)
-        return queryset
+    def get_object(self):
+        # user = get_object_or_404(User, email=self.request.user)
+        return User.objects.get(user_email=self.request.user)
+
+    # def get_queryset(self):
+    #     user = get_object_or_404(User, username=self.request.user)
+    #     return User.objects.filter(id=user.pk)
+
+    # def perform_update(self, serializer):
+    #     serializer.save(user=self.request.user)
 
 
 class UserAdminViewSet(CreateModelMixin, ListModelMixin, GenericViewSet):
@@ -71,7 +78,6 @@ class UserAdminViewSet(CreateModelMixin, ListModelMixin, GenericViewSet):
 
     def get_queryset(self):
         username = self.kwargs['username']
-        user = get_object_or_404(User, username=username)
         queryset = User.objects.filter(username=username)
         return queryset
 

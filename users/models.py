@@ -5,9 +5,9 @@ from django.utils.translation import gettext_lazy as _
 
 class User(AbstractUser):
     class Role(models.TextChoices):
-        USER = 'user', _('пользователь')
-        MODERATOR = 'moderator', _('модератор')
-        ADMIN = 'admin', _('админ')
+        USER = 'user'
+        MODERATOR = 'moderator'
+        ADMIN = 'admin'
 
     role = models.CharField(
         max_length=9,
@@ -20,4 +20,4 @@ class User(AbstractUser):
     REQUIRED_FIELDS = ['username']
 
     def __str__(self):
-        return self.email
+        return self.username

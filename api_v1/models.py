@@ -56,7 +56,7 @@ class Titles(models.Model):
     category = models.ForeignKey(
         Categories,
         related_name='titles',
-        on_delete=models.SET_NULL,
+        on_delete=models.CASCADE,
         blank=True,
         null=True,
         db_index=True
@@ -86,7 +86,7 @@ class Reviews(models.Model):
     )
     text = models.TextField()
     score_choices = [(i, i) for i in range(1, 11)]
-    score = models.IntegerField(choices=score_choices)
+    score = models.IntegerField(choices=score_choices, null=True)
     pub_date = models.DateTimeField(
         'Дата добавления',
         auto_now_add=True,
