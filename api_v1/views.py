@@ -84,7 +84,7 @@ class UserAdminViewSet(CreateModelMixin, ListModelMixin, GenericViewSet):
 
 class ReviewsViewSet(ModelViewSet):
     serializer_class = ReviewsSerializer
-    permission_classes = [IsOwnerOrReadOnly]
+    permission_classes = [IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
 
     def get_queryset(self):
         title_id = self.kwargs['title_id']
@@ -100,12 +100,12 @@ class ReviewsViewSet(ModelViewSet):
         ).exists()
         if is_unqiue:
             raise ValidationError('You can write only one review.')
-        serializer.save(author=self.request.user)
+        serializer.save(author=self.request.user, title=title)
 
 
 class CommentsViewSet(ModelViewSet):
     serializer_class = CommentsSerializer
-    permission_classes = [IsOwnerOrReadOnly]
+    permission_classes = [IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
     pagination_class = PageNumberPagination
 
     def get_queryset(self):
@@ -117,7 +117,8 @@ class CommentsViewSet(ModelViewSet):
         return queryset
 
     def perform_create(self, serializer):
-        serializer.save(author=self.request.user)
+        review = get_object_or_404(Reviews, pk=self.kwargs.get('review_id'))
+        serializer.save(author=self.request.user, review=review)
 
 
 class CategoryViewSet(ModelViewSet):
