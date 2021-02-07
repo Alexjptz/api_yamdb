@@ -28,6 +28,15 @@ GET {{baseUrl}}/users/me/
 Content-Type: application/json
 Authorization: Bearer {{token}}
 
+###
+
+PATCH {{baseUrl}}/users/me/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "role": "admin"
+}
 
 ###
 
@@ -35,3 +44,18 @@ GET {{baseUrl}}/users/
 Content-Type: application/json
 Authorization: Bearer {{token}}
 
+###
+
+GET {{baseUrl}}/users/testtest/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+###
+
+PATCH {{baseUrl}}/users/testtest/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "first_name": "test name"
+}

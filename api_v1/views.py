@@ -47,10 +47,11 @@ class CreateUser(CreateAPIView):
         return Response(serialized.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class UsersListCreateViewSet(CreateModelMixin, ListModelMixin, GenericViewSet):
+class UsersListCreateViewSet(ModelViewSet):
+    lookup_field = 'username'
     queryset = User.objects.all().order_by('-id')
     serializer_class = UserSerializer
-    permission_classes = [IsAuthenticated, IsModerator]
+    permission_classes = [IsAuthenticated, IsAdmin]
     filter_backends = [SearchFilter]
     search_fields = ('username',)
 
@@ -61,17 +62,6 @@ class UserPersonalData(RetrieveUpdateAPIView):
 
     def get_object(self):
         return self.request.user
-
-
-class UserAdminViewSet(CreateModelMixin, ListModelMixin, DestroyModelMixin, GenericViewSet):
-    queryset = User.objects.all().order_by('-id')
-    serializer_class = UserSerializer
-    permission_classes = [IsAuthenticated, IsAdmin]
-
-    # def get_queryset(self):
-    #     username = self.kwargs['username']
-    #     queryset = User.objects.filter(username=username)
-    #     return queryset
 
 
 class ReviewsViewSet(ModelViewSet):
