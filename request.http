@@ -1,4 +1,6 @@
 @baseUrl = http://127.0.0.1:8000/api/v1
+@token = eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjEyODE2Mzg4LCJqdGkiOiI5ZTI4M2ViY2I3MGM0ODJlODllYTUwMzI2M2IwOGE2OSIsInVzZXJfaWQiOjF9.dNeJurAYEVV2qhtojZ18Q3h5XIueifTw0uNWQO7Gu6c
+
 
 ###
 
@@ -16,5 +18,20 @@ Content-Type: application/json
 
 {
     "email": "testtest@myemail.com",
-    "confirmation_code": "4J8vSZvm9y"
+    "confirmation_code": "pXrqLWr9rQ"
 }
+
+
+###
+
+GET {{baseUrl}}/users/me/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+
+###
+
+GET {{baseUrl}}/users/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+

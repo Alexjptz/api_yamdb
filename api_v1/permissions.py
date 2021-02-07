@@ -17,11 +17,17 @@ class IsUser(BasePermission):
 
 
 class IsModerator(BasePermission):
+    def has_permission(self, request, view):
+        return request.user.role == User.Role.MODERATOR
+
     def has_object_permission(self, request, view, obj):
         return request.user.role == User.Role.MODERATOR
 
 
 class IsAdmin(BasePermission):
+    def has_permission(self, request, view):
+        return request.user.role == User.Role.ADMIN
+
     def has_object_permission(self, request, view, obj):
         return request.user.role == User.Role.ADMIN
 

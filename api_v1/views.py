@@ -1,6 +1,7 @@
 from re import split
 
 from django.contrib.auth import get_user_model
+from django.http import request
 from django.shortcuts import get_object_or_404
 from rest_framework import permissions
 from rest_framework.exceptions import ValidationError
@@ -47,39 +48,30 @@ class CreateUser(CreateAPIView):
 
 
 class UsersListCreateViewSet(CreateModelMixin, ListModelMixin, GenericViewSet):
-    queryset = User.objects.all()
+    queryset = User.objects.all().order_by('-id')
     serializer_class = UserSerializer
-    permission_classes = [IsAuthenticated, IsAdmin]
+    permission_classes = [IsAuthenticated, IsModerator]
     filter_backends = [SearchFilter]
     search_fields = ('username',)
-    pagination_class = PageNumberPagination
 
 
-class UserPersonalData(RetrieveModelMixin, UpdateModelMixin, GenericViewSet):
+class UserPersonalData(RetrieveUpdateAPIView):
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated]
-    pagination_class = None
 
     def get_object(self):
-        # user = get_object_or_404(User, email=self.request.user)
-        return User.objects.get(user_email=self.request.user)
-
-    # def get_queryset(self):
-    #     user = get_object_or_404(User, username=self.request.user)
-    #     return User.objects.filter(id=user.pk)
-
-    # def perform_update(self, serializer):
-    #     serializer.save(user=self.request.user)
+        return self.request.user
 
 
-class UserAdminViewSet(CreateModelMixin, ListModelMixin, GenericViewSet):
+class UserAdminViewSet(CreateModelMixin, ListModelMixin, DestroyModelMixin, GenericViewSet):
+    queryset = User.objects.all().order_by('-id')
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated, IsAdmin]
 
-    def get_queryset(self):
-        username = self.kwargs['username']
-        queryset = User.objects.filter(username=username)
-        return queryset
+    # def get_queryset(self):
+    #     username = self.kwargs['username']
+    #     queryset = User.objects.filter(username=username)
+    #     return queryset
 
 
 class ReviewsViewSet(ModelViewSet):

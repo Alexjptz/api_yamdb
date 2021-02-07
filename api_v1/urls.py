@@ -10,7 +10,6 @@ from .views import (CategoryViewSet, CommentsViewSet, CreateUser, GenreViewSet,
 
 v1_router = DefaultRouter()
 v1_router.register('users', UsersListCreateViewSet, basename='user-list')
-v1_router.register('users/me', UserPersonalData, basename='personaldata-list')
 v1_router.register(
     'users/(?P<username>.+)',
     UserAdminViewSet,
@@ -31,7 +30,7 @@ v1_router.register('genres', GenreViewSet, basename='genres')
 v1_router.register('titles', TitleViewSet, basename='titles')
 
 auth_patterns = [
-    path('email/', CreateUser, name='create_user'),
+    path('email/', CreateUser.as_view(), name='create_user'),
     path('token/', TokenObtainPairView.as_view(
         serializer_class=GetMyTokenSerializer),
         name='token_obtain'
@@ -40,6 +39,7 @@ auth_patterns = [
 ]
 
 urlpatterns = [
+    path('v1/users/me/', UserPersonalData.as_view(), name='personal_data'),
     path('v1/', include(v1_router.urls)),
     path('v1/auth/', include(auth_patterns)),
 ]
