@@ -104,7 +104,7 @@ class CommentsViewSet(ModelViewSet):
 
 class CategoryViewSet(ModelViewSet):
     queryset = Categories.objects.all().order_by('-name')
-    permission_classes = [IsAuthenticatedOrReadOnly, IsAdmin]
+    permission_classes = [ReadOnlyOrAdmin]
     serializer_class = CategorySerializer
     http_method_names = ['get', 'post', 'delete']
     lookup_field = 'slug'
@@ -114,7 +114,7 @@ class CategoryViewSet(ModelViewSet):
 
 class GenreViewSet(ModelViewSet):
     queryset = Genres.objects.all().order_by('-name')
-    permission_classes = [IsAuthenticatedOrReadOnly, IsAdmin]
+    permission_classes = [ReadOnlyOrAdmin]
     serializer_class = GenreSerializer
     http_method_names = ['get', 'post', 'delete']
     lookup_field = 'slug'
