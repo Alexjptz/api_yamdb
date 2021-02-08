@@ -1,22 +1,21 @@
 from re import split
 
 from django.contrib.auth import get_user_model
-from django.http import request
 from django.shortcuts import get_object_or_404
 from rest_framework import permissions
 from rest_framework.exceptions import ValidationError
 from rest_framework.filters import SearchFilter
 from rest_framework.generics import CreateAPIView, RetrieveUpdateAPIView
+from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
+                                   ListModelMixin)
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.permissions import (AllowAny, IsAuthenticated,
-                                        IsAuthenticatedOrReadOnly)
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.views import Response, status
-from rest_framework.viewsets import ModelViewSet, GenericViewSet
-from rest_framework.mixins import CreateModelMixin, ListModelMixin, DestroyModelMixin
+from rest_framework.viewsets import GenericViewSet, ModelViewSet
 
+from .filters import TitleFilterBackend
 from .models import Categories, Comments, Genres, Reviews, Titles
-from .permissions import (IsAdmin, IsModerator,
-                          IsOwnerOrReadOnly, IsUser, ReadOnlyOrAdmin)
+from .permissions import IsAdmin, IsModerator, IsOwnerOrReadOnly, ReadOnly
 from .serializers import (CategorySerializer, CommentsSerializer,
                           CreateUserSerializer, GenreSerializer,
                           ReviewsSerializer, TitleSerializerRead,
@@ -25,7 +24,8 @@ from .serializers import (CategorySerializer, CommentsSerializer,
 User = get_user_model()
 
 
-class CreateListDestroyView(CreateModelMixin, ListModelMixin, DestroyModelMixin, GenericViewSet):
+class CreateListDestroyView(CreateModelMixin, ListModelMixin,
+                            DestroyModelMixin, GenericViewSet):
     pass
 
 
@@ -44,7 +44,7 @@ class CreateUser(CreateAPIView):
             )
             user.email_user(
                 subject='Код подтверждения',
-                message='Твой код подтверждения - {}'.format(confirmation_code),
+                message='Код подтверждения - {}'.format(confirmation_code),
                 from_email='Test@test.com'
             )
             return Response(serialized.data, status=status.HTTP_201_CREATED)
@@ -70,7 +70,7 @@ class UserPersonalData(RetrieveUpdateAPIView):
 
 class ReviewsViewSet(ModelViewSet):
     serializer_class = ReviewsSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
+    permission_classes = [IsOwnerOrReadOnly | IsAdmin | IsModerator]
 
     def get_queryset(self):
         title_id = self.kwargs['title_id']
@@ -91,7 +91,7 @@ class ReviewsViewSet(ModelViewSet):
 
 class CommentsViewSet(ModelViewSet):
     serializer_class = CommentsSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
+    permission_classes = [IsOwnerOrReadOnly | IsAdmin | IsModerator]
     pagination_class = PageNumberPagination
 
     def get_queryset(self):
@@ -109,7 +109,7 @@ class CommentsViewSet(ModelViewSet):
 
 class CategoryViewSet(CreateListDestroyView):
     queryset = Categories.objects.all().order_by('-name')
-    permission_classes = [ReadOnlyOrAdmin]
+    permission_classes = [ReadOnly | IsAdmin]
     serializer_class = CategorySerializer
     lookup_field = 'slug'
     filter_backends = [SearchFilter]
@@ -118,7 +118,7 @@ class CategoryViewSet(CreateListDestroyView):
 
 class GenreViewSet(CreateListDestroyView):
     queryset = Genres.objects.all().order_by('-name')
-    permission_classes = [ReadOnlyOrAdmin]
+    permission_classes = [ReadOnly | IsAdmin]
     serializer_class = GenreSerializer
     lookup_field = 'slug'
     filter_backends = [SearchFilter]
@@ -127,9 +127,8 @@ class GenreViewSet(CreateListDestroyView):
 
 class TitleViewSet(ModelViewSet):
     queryset = Titles.objects.all().order_by('-name')
-    permission_classes = [ReadOnlyOrAdmin]
-    filter_backends = [SearchFilter]
-    search_fields = ['=name', '=year', '=category__slug', '=genre__slug']
+    permission_classes = [ReadOnly | IsAdmin]
+    filter_backends = [TitleFilterBackend]
 
     def get_serializer_class(self):
         if self.request.method in permissions.SAFE_METHODS:

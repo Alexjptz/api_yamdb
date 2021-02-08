@@ -9,6 +9,7 @@ from .views import (CategoryViewSet, CommentsViewSet, CreateUser, GenreViewSet,
                     UsersListCreateViewSet)
 
 v1_router = DefaultRouter()
+
 v1_router.register('users', UsersListCreateViewSet, basename='user-list')
 v1_router.register(
     'titles/(?P<title_id>[0-9]+)/reviews',

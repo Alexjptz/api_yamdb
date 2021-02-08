@@ -91,6 +91,9 @@ class Reviews(models.Model):
         db_index=True
     )
 
+    def __str__(self):
+        return self.text
+
 
 class Comments(models.Model):
     author = models.ForeignKey(
@@ -109,3 +112,6 @@ class Comments(models.Model):
         auto_now_add=True,
         db_index=True
     )
+
+    def __str__(self):
+        return self.text
