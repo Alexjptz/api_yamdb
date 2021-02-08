@@ -5,8 +5,8 @@ from rest_framework_simplejwt.views import (TokenObtainPairView,
 
 from .serializers import GetMyTokenSerializer
 from .views import (CategoryViewSet, CommentsViewSet, CreateUser, GenreViewSet,
-                    ReviewsViewSet, TitleViewSet,
-                    UserPersonalData, UsersListCreateViewSet)
+                    ReviewsViewSet, TitleViewSet, UserPersonalData,
+                    UsersListCreateViewSet)
 
 v1_router = DefaultRouter()
 v1_router.register('users', UsersListCreateViewSet, basename='user-list')

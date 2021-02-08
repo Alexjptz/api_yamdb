@@ -25,14 +25,16 @@ class IsModerator(BasePermission):
 
 
 class IsAdmin(BasePermission):
-    def has_permission(self, request, view):
-        return request.user.role == User.Role.ADMIN or request.user.is_superuser
-
     def has_object_permission(self, request, view, obj):
-        return request.user.role == User.Role.ADMIN or request.user.is_superuser
-
-
-class IsAdminOrReadOnly(BasePermission):
-    def has_permission(self, request, view):
-        return (request.method in SAFE_METHODS or
+        return (request.user.is_superuser or
                 request.user.role == User.Role.ADMIN)
+
+    def has_permission(self, request, view):
+        return (request.user.is_superuser or
+                request.user.role == User.Role.ADMIN)
+
+
+class ReadOnlyOrAdmin(BasePermission):
+    def has_object_permission(self, request, view, obj):
+        return (request.method in SAFE_METHODS or
+                request.user.is_active and request.user.is_superuser)

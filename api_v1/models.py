@@ -61,8 +61,6 @@ class Titles(models.Model):
         null=True,
         db_index=True
     )
-    # нужно добавить метод rating (считает среднее по ревью)
-    # желательно сделать свойством @property
 
     @property
     def rating(self):

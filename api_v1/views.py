@@ -7,16 +7,15 @@ from rest_framework import permissions
 from rest_framework.exceptions import ValidationError
 from rest_framework.filters import SearchFilter
 from rest_framework.generics import CreateAPIView, RetrieveUpdateAPIView
-from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
-                                   ListModelMixin, RetrieveModelMixin, UpdateModelMixin)
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import (AllowAny, IsAuthenticated,
                                         IsAuthenticatedOrReadOnly)
-from rest_framework.views import APIView, Response, status
-from rest_framework.viewsets import GenericViewSet, ModelViewSet
+from rest_framework.views import Response, status
+from rest_framework.viewsets import ModelViewSet
 
 from .models import Categories, Comments, Genres, Reviews, Titles
-from .permissions import IsAdmin, IsAdminOrReadOnly, IsModerator, IsOwnerOrReadOnly, IsUser
+from .permissions import (IsAdmin, IsModerator,
+                          IsOwnerOrReadOnly, IsUser, ReadOnlyOrAdmin)
 from .serializers import (CategorySerializer, CommentsSerializer,
                           CreateUserSerializer, GenreSerializer,
                           ReviewsSerializer, TitleSerializerRead,
@@ -71,7 +70,7 @@ class ReviewsViewSet(ModelViewSet):
     def get_queryset(self):
         title_id = self.kwargs['title_id']
         title = get_object_or_404(Titles, id=title_id)
-        queryset = Reviews.objects.filter(title=title)
+        queryset = Reviews.objects.filter(title=title).order_by('-pub_date')
         return queryset
 
     def perform_create(self, serializer):
@@ -95,7 +94,7 @@ class CommentsViewSet(ModelViewSet):
         title = get_object_or_404(Titles, id=title_id)
         review_id = self.kwargs['review_id']
         review = get_object_or_404(Reviews, title=title, id=review_id)
-        queryset = Comments.objects.filter(review=review)
+        queryset = Comments.objects.filter(review=review).order_by('-pub_date')
         return queryset
 
     def perform_create(self, serializer):
@@ -104,18 +103,18 @@ class CommentsViewSet(ModelViewSet):
 
 
 class CategoryViewSet(ModelViewSet):
-    permission_classes = [IsOwnerOrReadOnly]
+    queryset = Categories.objects.all().order_by('-name')
+    permission_classes = [IsAuthenticatedOrReadOnly, IsAdmin]
     serializer_class = CategorySerializer
-    queryset = Categories.objects.all()
     http_method_names = ['get', 'post', 'delete']
     lookup_field = 'slug'
     filter_backends = [SearchFilter]
-    search_fields = ['=name']
+    search_fields = ['=name', '=slug']
 
 
 class GenreViewSet(ModelViewSet):
-    queryset = Genres.objects.all()
-    permission_classes = [IsOwnerOrReadOnly]
+    queryset = Genres.objects.all().order_by('-name')
+    permission_classes = [IsAuthenticatedOrReadOnly, IsAdmin]
     serializer_class = GenreSerializer
     http_method_names = ['get', 'post', 'delete']
     lookup_field = 'slug'
@@ -124,8 +123,8 @@ class GenreViewSet(ModelViewSet):
 
 
 class TitleViewSet(ModelViewSet):
-    queryset = Titles.objects.all()
-    permission_classes = [IsOwnerOrReadOnly]
+    queryset = Titles.objects.all().order_by('-name')
+    permission_classes = [ReadOnlyOrAdmin]
     filter_backends = [SearchFilter]
     search_fields = ['=name', '=year', '=category__slug', '=genre__slug']
 
