@@ -1,8 +1,8 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework.exceptions import ValidationError
 
-from .models import Categories, Comments, Genres, Reviews, Titles
+from .models import Category, Comment, Genre, Review, Title
 
 User = get_user_model()
 
@@ -26,18 +26,9 @@ class UserSerializer(serializers.ModelSerializer):
         )
 
 
-class GetMyTokenSerializer(TokenObtainPairSerializer):
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        del self.fields['password']
-        self.fields['confirmation_code'] = serializers.CharField(
-            required=True
-        )
-
-    def validate(self, attrs):
-        attrs['password'] = attrs.pop('confirmation_code')
-        return super().validate(attrs)
+class ConfirmTokenSerializer(serializers.Serializer):
+    email = serializers.EmailField(required=True)
+    confirmation_code = serializers.CharField(required=True)
 
 
 class ReviewsSerializer(serializers.ModelSerializer):
@@ -48,7 +39,17 @@ class ReviewsSerializer(serializers.ModelSerializer):
 
     class Meta:
         fields = ('id', 'text', 'author', 'score', 'pub_date',)
-        model = Reviews
+        model = Review
+
+    def validate(self, data):
+        if self.context['request'].method == 'POST':
+            is_unqiue = Review.objects.filter(
+                author=self.context['request'].user,
+                title=self.context['view'].kwargs.get('title_id')
+            ).exists()
+            if is_unqiue:
+                raise ValidationError('You can write only one review.')
+        return data
 
 
 class CommentsSerializer(serializers.ModelSerializer):
@@ -59,29 +60,30 @@ class CommentsSerializer(serializers.ModelSerializer):
 
     class Meta:
         fields = ('id', 'text', 'author', 'pub_date',)
-        model = Comments
+        model = Comment
 
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         fields = ('name', 'slug',)
-        model = Categories
+        model = Category
 
 
 class GenreSerializer(serializers.ModelSerializer):
     class Meta:
         fields = ('name', 'slug',)
-        model = Genres
+        model = Genre
 
 
 class TitleSerializerRead(serializers.ModelSerializer):
-    genre = GenreSerializer(many=True, required=False)
     category = CategorySerializer(required=False)
+    genre = GenreSerializer(many=True, required=False)
     rating = serializers.IntegerField(required=False)
 
     class Meta:
         fields = '__all__'
-        model = Titles
+        model = Title
+        read_only_fields = ('genre', 'category', 'rating',)
 
 
 class TitleSerializerWrite(serializers.ModelSerializer):
@@ -89,14 +91,13 @@ class TitleSerializerWrite(serializers.ModelSerializer):
     genre = serializers.SlugRelatedField(
         many=True,
         slug_field='slug',
-        queryset=Genres.objects.all()
+        queryset=Genre.objects.all()
     )
     category = serializers.SlugRelatedField(
         slug_field='slug',
-        required=False,
-        queryset=Categories.objects.all()
+        queryset=Category.objects.all()
     )
 
     class Meta:
         fields = '__all__'
-        model = Titles
+        model = Title

@@ -1,12 +1,9 @@
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
-from rest_framework_simplejwt.views import (TokenObtainPairView,
-                                            TokenRefreshView)
 
-from .serializers import GetMyTokenSerializer
-from .views import (CategoryViewSet, CommentsViewSet, CreateUser, GenreViewSet,
-                    ReviewsViewSet, TitleViewSet, UserPersonalData,
-                    UsersListCreateViewSet)
+from .views import (CategoryViewSet, CommentsViewSet, GenreViewSet,
+                    ReviewsViewSet, TitleViewSet, UsersListCreateViewSet,
+                    createuser, get_token)
 
 v1_router = DefaultRouter()
 
@@ -26,16 +23,12 @@ v1_router.register('genres', GenreViewSet, basename='genres')
 v1_router.register('titles', TitleViewSet, basename='titles')
 
 auth_patterns = [
-    path('email/', CreateUser.as_view(), name='create_user'),
-    path('token/', TokenObtainPairView.as_view(
-        serializer_class=GetMyTokenSerializer),
-        name='token_obtain'
-    ),
-    path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('email/', createuser, name='create_user'),
+    path('token/', get_token, name='token_obtain'),
 ]
 
 urlpatterns = [
-    path('v1/users/me/', UserPersonalData.as_view(), name='personal_data'),
+    # path('v1/users/me/', UserPersonalData.as_view(), name='personal_data'),
     path('v1/', include(v1_router.urls)),
     path('v1/auth/', include(auth_patterns)),
 ]
