@@ -10,7 +10,6 @@ from rest_framework import permissions
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.exceptions import ValidationError
 from rest_framework.filters import SearchFilter
-# from rest_framework.generics import RetrieveUpdateAPIView
 from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
                                    ListModelMixin)
 from rest_framework.pagination import PageNumberPagination
@@ -86,27 +85,26 @@ class UsersListCreateViewSet(ModelViewSet):
     lookup_field = 'username'
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    # permission_classes = [IsAuthenticated, IsAdmin]
+    permission_classes = [IsAuthenticated, IsAdmin]
     filter_backends = [SearchFilter]
     search_fields = ('username',)
 
     @action(
-        methods=['get', 'patch'],
-        detail=True,
-        url_path='me/',
+        methods=['GET', 'PATCH'],
+        detail=False,
         permission_classes=[IsAuthenticated]
     )
     def me(self, request, pk=None):
         user = self.request.user
-        serializer = self.get_serializer(user, many=True)
+        serializer = self.get_serializer(user)
+        if request.method == 'PATCH':
+            serializer = self.get_serializer(
+                user,
+                data=request.data,
+                partial=True)
+            serializer.is_valid(raise_exception=True)
+            serializer.save(role=user.role)
         return Response(serializer.data)
-
-# class UserPersonalData(RetrieveUpdateAPIView):
-#     serializer_class = UserSerializer
-#     permission_classes = [IsAuthenticated]
-
-#     def get_object(self):
-#         return self.request.user
 
 
 class ReviewsViewSet(ModelViewSet):

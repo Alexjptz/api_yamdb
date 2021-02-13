@@ -1,8 +1,6 @@
 from django.contrib.auth import get_user_model
 from rest_framework.permissions import SAFE_METHODS, BasePermission
 
-from users.models import Role
-
 User = get_user_model()
 
 
@@ -29,35 +27,27 @@ class IsOwnerOrReadOnly(BasePermission):
 class IsModerator(BasePermission):
     def has_permission(self, request, view):
         return (
-            request.user.is_active
-            and request.user.is_authenticated
-            and request.user.role == Role.MODERATOR
+            not request.user.is_anonymous
+            and request.user.is_moderator
         )
 
     def has_object_permission(self, request, view, obj):
         return (
-            request.user.is_active
+            not request.user.is_anonymous
+            and request.user.is_moderator
             and request.method == 'DELETE'
-            and request.user.is_authenticated
-            and request.user.role == Role.MODERATOR
         )
 
 
 class IsAdmin(BasePermission):
     def has_object_permission(self, request, view, obj):
         return (
-            request.user.is_active
-            and request.user.is_superuser
-            or request.user.is_active
-            and request.user.is_authenticated
-            and request.user.role == Role.ADMIN
+            not request.user.is_anonymous
+            and request.user.is_admin
         )
 
     def has_permission(self, request, view):
         return (
-            request.user.is_active
-            and request.user.is_superuser
-            or request.user.is_active
-            and request.user.is_authenticated
-            and request.user.role == Role.ADMIN
+            not request.user.is_anonymous
+            and request.user.is_admin
         )

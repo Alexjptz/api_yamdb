@@ -28,7 +28,6 @@ auth_patterns = [
 ]
 
 urlpatterns = [
-    # path('v1/users/me/', UserPersonalData.as_view(), name='personal_data'),
     path('v1/', include(v1_router.urls)),
     path('v1/auth/', include(auth_patterns)),
 ]

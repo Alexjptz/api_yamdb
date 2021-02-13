@@ -23,5 +23,23 @@ class User(AbstractUser):
     class Meta:
         ordering = ['-id']
 
+    @property
+    def is_admin(self):
+        return (
+            self.role == Role.ADMIN
+            and self.is_active
+            and self.is_authenticated
+            or self.is_active
+            and self.is_superuser
+        )
+
+    @property
+    def is_moderator(self):
+        return (
+            self.role == Role.MODERATOR
+            and self.is_active
+            and self.is_authenticated
+        )
+
     def __str__(self):
         return self.username
