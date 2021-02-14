@@ -1,12 +1,12 @@
 @baseUrl = http://127.0.0.1:8000/api/v1
-@token = eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjEzMjYyODc2LCJqdGkiOiJkNzVkOTY4NzIxMTU0YjBiOGY1YWZiMDVjNjJjYjNhNSIsInVzZXJfaWQiOjV9.Am55Dkb3Xq1AvDnabA--VvH8tOMGlfXX83bksu1fwBA
+@token = eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjEzMzkwMzkwLCJqdGkiOiI4ODM2ZDFiYmQxZjc0YzkxOGNjZDZhMDliZTQxNDhlZSIsInVzZXJfaWQiOjF9.LOi3sUy2MbS6-CLtrJFzSiismiGGpEFzX7Ci0pgL0JU
 ###
 
 POST {{baseUrl}}/auth/email/
 Content-Type: application/json
 
 {
-    "email": "tesrrrtt@myemail.com"
+    "email": "testtoken@myemail.com"
 }
 
 ###
@@ -15,8 +15,8 @@ POST {{baseUrl}}/auth/token/
 Content-Type: application/json
 
 {
-    "email": "tesrrrtt@myemail.com",
-    "confirmation_code": "5o4-349835f2f5c0eee27f01"
+    "email": "testtoken@myemail.com",
+    "confirmation_code": "5o5-601fcc1af6976a8a460e"
 }
 
 
@@ -44,7 +44,7 @@ Authorization: Bearer {{token}}
 
 ###
 
-GET {{baseUrl}}/users/testtest/
+GET {{baseUrl}}/users/test/
 Content-Type: application/json
 Authorization: Bearer {{token}}
 
@@ -57,6 +57,29 @@ Authorization: Bearer {{token}}
 {
     "first_name": "test name"
 }
+
+###
+
+GET {{baseUrl}}/titles/1/reviews
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+###
+
+POST {{baseUrl}}/titles/1/reviews/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "text": "Try to make second review",
+    "score": 5
+}
+
+###
+
+GET {{baseUrl}}/titles/1
+Content-Type: application/json
+Authorization: Bearer {{token}}
 
 ###
 

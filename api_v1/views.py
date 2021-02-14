@@ -1,11 +1,10 @@
 from re import split
 
+from rest_framework_simplejwt.tokens import AccessToken
 from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
 from django.db.models.aggregates import Avg
-from django.http import Http404
-from django.shortcuts import get_object_or_404 as _get_object_or_404
-from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.generics import get_object_or_404
 from rest_framework import permissions
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.exceptions import ValidationError
@@ -30,13 +29,6 @@ from .serializers import (CategorySerializer, CommentsSerializer,
 User = get_user_model()
 
 
-def get_object_or_404(queryset, *filter_args, **filter_kwargs):
-    try:
-        return _get_object_or_404(queryset, *filter_args, **filter_kwargs)
-    except (TypeError, ValueError, ValidationError):
-        raise Http404
-
-
 class CreateListDestroyView(CreateModelMixin, ListModelMixin,
                             DestroyModelMixin, GenericViewSet):
     pass
@@ -44,7 +36,7 @@ class CreateListDestroyView(CreateModelMixin, ListModelMixin,
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
-def createuser(request):
+def create_user(request):
     serialized = CreateUserSerializer(data=request.data)
     serialized.is_valid()
     username = split(r'_', serialized.data['email'])[0]
@@ -73,11 +65,9 @@ def get_token(request):
         serialized.validated_data['confirmation_code']
     ):
         raise ValidationError('Data is not valid')
-    token = TokenObtainPairSerializer.get_token(user)
+    access = AccessToken.for_user(user)
     return Response(
-        {'refresh': str(token),
-         'access': str(token.access_token)},
-        status=status.HTTP_200_OK
+        {"token": str(access)}
     )
 
 
@@ -96,7 +86,6 @@ class UsersListCreateViewSet(ModelViewSet):
     )
     def me(self, request, pk=None):
         user = self.request.user
-        serializer = self.get_serializer(user)
         if request.method == 'PATCH':
             serializer = self.get_serializer(
                 user,
@@ -104,6 +93,7 @@ class UsersListCreateViewSet(ModelViewSet):
                 partial=True)
             serializer.is_valid(raise_exception=True)
             serializer.save(role=user.role)
+        serializer = self.get_serializer(user)
         return Response(serializer.data)
 
 
@@ -112,8 +102,10 @@ class ReviewsViewSet(ModelViewSet):
     permission_classes = [IsOwnerOrReadOnly | IsAdmin | IsModerator]
 
     def get_queryset(self):
-        title_id = self.kwargs['title_id']
-        title = get_object_or_404(Title, id=title_id)
+        title = get_object_or_404(
+            Title,
+            id=self.kwargs['title_id']
+        )
         queryset = title.reviews.all()
         return queryset
 
@@ -168,7 +160,6 @@ class TitleViewSet(ModelViewSet):
         rating=Avg('reviews__score')
     ).order_by('-rating')
     permission_classes = [ReadOnly | IsAdmin]
-    filter_backends = [DjangoFilterBackend]
     filterset_class = TitleFilter
 
     def get_serializer_class(self):

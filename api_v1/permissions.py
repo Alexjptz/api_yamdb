@@ -27,27 +27,27 @@ class IsOwnerOrReadOnly(BasePermission):
 class IsModerator(BasePermission):
     def has_permission(self, request, view):
         return (
-            not request.user.is_anonymous
+            request.user.is_authenticated
             and request.user.is_moderator
         )
 
     def has_object_permission(self, request, view, obj):
         return (
-            not request.user.is_anonymous
+            request.method == 'DELETE'
+            and request.user.is_authenticated
             and request.user.is_moderator
-            and request.method == 'DELETE'
         )
 
 
 class IsAdmin(BasePermission):
-    def has_object_permission(self, request, view, obj):
+    def has_permission(self, request, view):
         return (
-            not request.user.is_anonymous
+            request.user.is_authenticated
             and request.user.is_admin
         )
 
-    def has_permission(self, request, view):
+    def has_object_permission(self, request, view, obj):
         return (
-            not request.user.is_anonymous
+            request.user.is_authenticated
             and request.user.is_admin
         )

@@ -28,7 +28,6 @@ class User(AbstractUser):
         return (
             self.role == Role.ADMIN
             and self.is_active
-            and self.is_authenticated
             or self.is_active
             and self.is_superuser
         )
@@ -38,7 +37,6 @@ class User(AbstractUser):
         return (
             self.role == Role.MODERATOR
             and self.is_active
-            and self.is_authenticated
         )
 
     def __str__(self):

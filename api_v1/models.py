@@ -2,7 +2,7 @@ from datetime import datetime
 
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
-from django.core.validators import MaxValueValidator
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
@@ -21,9 +21,9 @@ def get_unique_slug(self, model):
 
 
 def validate_year(value):
-    if value > int(datetime.now().year):
+    if value > int(datetime.now().year) + 2:
         raise ValidationError(
-            _('До %(value)s мы еще не дожили'),
+            _('До %(value)s еще далеко'),
             params={'value': value},
         )
     return value
@@ -147,8 +147,11 @@ class Review(models.Model):
     text = models.TextField(
         verbose_name='Содержание'
     )
-    score = models.PositiveIntegerField(
-        validators=[MaxValueValidator(10, 'Диапазон от 1 до 10')],
+    score = models.PositiveSmallIntegerField(
+        validators=[
+            MaxValueValidator(10, 'Диапазон от 1 до 10'),
+            MinValueValidator(1, 'Диапазон от 1 до 10')
+        ],
         null=True,
         db_index=True,
         verbose_name='Рейтинг'
@@ -160,6 +163,7 @@ class Review(models.Model):
     )
 
     class Meta:
+        unique_together = ('author', 'title',)
         ordering = ['-pub_date']
         verbose_name = 'Отзыв'
         verbose_name_plural = 'Отзывы'
