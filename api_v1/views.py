@@ -1,21 +1,20 @@
 from re import split
 
-from rest_framework_simplejwt.tokens import AccessToken
 from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
 from django.db.models.aggregates import Avg
-from rest_framework.generics import get_object_or_404
 from rest_framework import permissions
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.exceptions import ValidationError
 from rest_framework.filters import SearchFilter
+from rest_framework.generics import get_object_or_404
 from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
                                    ListModelMixin)
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.views import Response, status
 from rest_framework.viewsets import GenericViewSet, ModelViewSet
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework_simplejwt.tokens import AccessToken
 
 from .filters import TitleFilter
 from .models import Category, Genre, Review, Title
